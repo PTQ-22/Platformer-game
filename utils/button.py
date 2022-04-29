@@ -17,12 +17,14 @@ class Button:
     def draw(self, win: pygame.Surface):
         pygame.draw.rect(win, self.current_color, self.rect)
         win.blit(self.text_obj, self.text_rect)
-        self.is_mouse()
+        self.is_mouse(None)
 
-    def is_mouse(self):
+    def is_mouse(self, event: pygame.event) -> bool:
         pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(pos):
             self.current_color = self.hover_color
-            return True
+            if event is not None and event.type == pygame.MOUSEBUTTONDOWN:
+                return True
+            return False
         self.current_color = self.color
         return False
