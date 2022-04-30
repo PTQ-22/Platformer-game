@@ -2,7 +2,7 @@ import sys
 from typing import Tuple
 import pygame
 
-from routes.route import Route
+from routes.game import Game
 from utils.button import Button
 
 
@@ -33,6 +33,6 @@ class Menu:
                 sys.exit(0)
             for button in self.buttons:  # TODO
                 if button.is_mouse(event):
-                    return Route()
+                    return Game()
 
         return self
