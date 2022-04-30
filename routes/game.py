@@ -1,66 +1,58 @@
+import pickle
+import socket
+
 import pygame
 import sys
 from player.player import Player
-
-
-class Field:
-
-    def __init__(self, x: int, y: int, size: int):
-        self.rect = pygame.Rect(x, y, size, size)
-        self.color = (255, 255, 255)
-
-    def draw(self, win: pygame.Surface):
-        pygame.draw.rect(win, self.color, self.rect)
-        pygame.draw.rect(win, (0, 0, 0), self.rect, 1)
+from server.game_data_object import GameDataObject
 
 
 class Game:
 
     def __init__(self):
-        self.color = (200, 200, 200)  # TODO change to picture
-        self.player = Player()
 
-        self.grid = []
-        self.field_size = 50
-        self.make_grid()
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def make_grid(self):
-        for i in range(0, 1000, self.field_size):
-            self.grid.append([])
-            for j in range(0, 700, self.field_size):
-                self.grid[i // self.field_size].append(
-                    Field(i, j, self.field_size)
-                )
-        with open("res/board.txt") as file:
-            x = file.readlines()
-            for i, line in enumerate(x):
-                for j, c in enumerate(line):
-                    if c == '\n':
-                        break
-                    if c == '#':
-                        self.grid[j][i].color = (100, 40, 40)
+        self.client.connect(("127.0.0.1", 6666))
+        self.player_id = int(self.client.recv(8*4096).decode("utf-8"))
+        self.game_data: GameDataObject = pickle.loads(self.client.recv(8*4096))
 
-        # for i in range(7, 14):
-        #     self.grid[i][7].color = (100, 40, 40)
-        # for i in range(3, 9):
-        #     self.grid[i][4].color = (100, 40, 40)
-        # for i in range(12, 19):
-        #     self.grid[i][9].color = (100, 40, 40)
+        self.players = {}
+        for p_id, player_obj in self.game_data.players.items():
+            self.players.setdefault(int(p_id), Player(p_id, player_obj.x, player_obj.y))
+
+        self.local_player = self.players[self.player_id]
 
     def draw(self, win: pygame.Surface):
-        win.fill(self.color)
-
-        for row in self.grid:
+        for row in self.game_data.grid:
             for field in row:
                 field.draw(win)
-
-        self.player.draw(win)
+        for player in self.players.values():
+            player.draw(win)
 
     def update_state(self):
-        self.player.update(self.grid)
+        self.local_player.update(self.game_data.grid)
+
+        self.update_player_in_game_obj()
+        self.fetch_data_from_server()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
         return self
+
+    def update_player_in_game_obj(self):
+        self.game_data.players[self.player_id].x = self.local_player.rect.x
+        self.game_data.players[self.player_id].y = self.local_player.rect.y
+
+    def fetch_data_from_server(self):
+        self.client.send(pickle.dumps(self.game_data))
+        self.game_data = pickle.loads(self.client.recv(8*4096))
+        print(self.game_data.players)
+        for p_id, player_obj in self.game_data.players.items():
+            if p_id not in self.players:
+                self.players.setdefault(int(p_id), Player(p_id, player_obj.x, player_obj.y))
+            if p_id != self.player_id:
+                self.players[p_id].rect.x = player_obj.x
+                self.players[p_id].rect.y = player_obj.y

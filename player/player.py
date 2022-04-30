@@ -5,15 +5,15 @@ import pygame
 
 class Player:
 
-    def __init__(self):
+    def __init__(self, player_id: int, x: int, y: int):
+        self.id = player_id
         img = pygame.image.load("res/player_1.png").convert_alpha()
         self.image = pygame.transform.scale(img, (38, 63))
-        self.rect = self.image.get_rect(center=(200, 10))
+        self.rect = self.image.get_rect(center=(x, y))
         self.speed = 1
         self.gravity_speed = 1
         self.jump_val = 0
         self.can_jump = True
-        # self.grid_pos =
 
     def draw(self, win: pygame.Surface):
         win.blit(self.image, self.rect)

@@ -11,7 +11,6 @@ def main():
     route = Menu(win_size)
 
     while True:
-        win.fill((255, 255, 255))  # TODO change background
 
         route.draw(win)
 
