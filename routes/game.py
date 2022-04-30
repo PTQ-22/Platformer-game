@@ -31,13 +31,21 @@ class Game:
                 self.grid[i // self.field_size].append(
                     Field(i, j, self.field_size)
                 )
+        with open("res/board.txt") as file:
+            x = file.readlines()
+            for i, line in enumerate(x):
+                for j, c in enumerate(line):
+                    if c == '\n':
+                        break
+                    if c == '#':
+                        self.grid[j][i].color = (100, 40, 40)
 
-        for i in range(7, 14):
-            self.grid[i][7].color = (100, 40, 40)
-        for i in range(3, 9):
-            self.grid[i][4].color = (100, 40, 40)
-        for i in range(12, 19):
-            self.grid[i][9].color = (100, 40, 40)
+        # for i in range(7, 14):
+        #     self.grid[i][7].color = (100, 40, 40)
+        # for i in range(3, 9):
+        #     self.grid[i][4].color = (100, 40, 40)
+        # for i in range(12, 19):
+        #     self.grid[i][9].color = (100, 40, 40)
 
     def draw(self, win: pygame.Surface):
         win.fill(self.color)

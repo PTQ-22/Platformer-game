@@ -13,9 +13,11 @@ class Player:
         self.gravity_speed = 1
         self.jump_val = 0
         self.can_jump = True
+        # self.grid_pos =
 
     def draw(self, win: pygame.Surface):
         win.blit(self.image, self.rect)
+        pygame.draw.circle(win, (255, 0, 0), self.rect.center, 3)
 
     def key_handler(self, blocks_state: Set[str]):
         keys = pygame.key.get_pressed()
@@ -26,7 +28,7 @@ class Player:
             if 'left' not in blocks_state and self.rect.x > 0:
                 self.rect.x -= self.speed
         if keys[pygame.K_SPACE] and ('on' in blocks_state) and self.can_jump:
-            self.jump_val = 250
+            self.jump_val = 150
             self.can_jump = False
 
     def update(self, grid):
@@ -37,7 +39,7 @@ class Player:
 
         if self.jump_val > 0:
             self.jump_val -= 3
-            if 'in' not in blocks_state:
+            if 'top' not in blocks_state:
                 self.rect.y -= 3
         else:
             self.can_jump = True
@@ -51,9 +53,11 @@ class Player:
                         and field.color != (255, 255, 255):
                     states.add('on')
                 elif collision and field.color != (255, 255, 255):
-                    states.add('in')
                     if self.rect.x > field.rect.x:
                         states.add('left')
                     else:
                         states.add('right')
+                head_collision = field.rect.collidepoint(self.rect.midtop)
+                if head_collision and field.color != (255, 255, 255):
+                    states.add('top')
         return states
