@@ -1,4 +1,6 @@
+import random
 import socket
+import time
 from _thread import *
 import pickle
 from server.game_data_object import GameDataObject
@@ -9,22 +11,44 @@ games = {1: game_data_obj}
 
 def threaded_client(conn: socket.socket, player_id: int):
     game_obj = games[1]
-    game_obj.add_player(player_id)
+    game_obj.add_player(player_id, random.randint(10, 940))
     conn.send(f"{player_id}".encode('utf-8'))
     conn.send(pickle.dumps(game_obj))
     while True:
         try:
-            player = pickle.loads(conn.recv(8*4096))
+            try:
+                player = pickle.loads(conn.recv(8*4096))
+            except EOFError:
+                break
             game_obj = games[1]
-            # print(len(game_obj.players))
             game_obj.update(player)
 
             conn.sendall(pickle.dumps(game_obj))
         except socket.error:
             break
-    game_obj.players.pop(player_id)
+    game_obj = games[1]
+    game_obj.remove_player(player_id)
     print(f"Close connection with {player_id}")
     conn.close()
+
+
+def grid_controller():
+    game_obj = games[1]
+    while True:
+        print(game_obj.players)
+        for i in range(20):
+            for j in range(14):
+                if game_obj.grid[i][j].type == '#':
+                    if game_obj.grid[i][j].color[0] + game_obj.grid[i][j].multiplier < 255:
+                        time.sleep(0.05)
+                        game_obj.grid[i][j].color = (
+                            game_obj.grid[i][j].color[0] + game_obj.grid[i][j].multiplier,
+                            0,
+                            0
+                        )
+                        # print(f"color changed to {game_obj.grid[i][j].color}")
+                    else:
+                        game_obj.grid[i][j].color = (255, 255, 255)
 
 
 def main():
@@ -39,9 +63,15 @@ def main():
     s.listen()
     print("Server started")
 
+    start_new_thread(grid_controller, ())
+
     id_counter = 0
     while True:
-        connection, address = s.accept()
-        print(f"{address}, id = {id_counter} connected")
-        start_new_thread(threaded_client, (connection, id_counter))
-        id_counter += 1
+        try:
+            connection, address = s.accept()
+            print(f"{address}, id = {id_counter} connected")
+            start_new_thread(threaded_client, (connection, id_counter))
+            id_counter += 1
+        except KeyboardInterrupt:
+            print("Server stopped")
+            break

@@ -34,7 +34,7 @@ class Player:
     def update(self, grid):
         blocks_state = self.is_on_block(grid)
         self.key_handler(blocks_state)
-        if 'on' not in blocks_state:
+        if 'on' not in blocks_state and self.rect.y - 10 < 750:
             self.rect.y += self.gravity_speed
 
         if self.jump_val > 0:

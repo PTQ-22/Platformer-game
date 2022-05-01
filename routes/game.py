@@ -23,18 +23,23 @@ class Game:
             self.players.setdefault(int(p_id), Player(p_id, player_obj.x, player_obj.y))
 
         self.local_player = self.players[self.player_id]
+        self.is_player_alive = True
+        self.font = pygame.font.Font("freesansbold.ttf", 50)
 
     def draw(self, win: pygame.Surface):
+        text_obj = self.font.render(str(self.game_data.alive), False, (0, 0, 0))
         for row in self.game_data.grid:
             for field in row:
                 field.draw(win)
+
+        win.blit(text_obj, (20, 20))
+
         for player in self.players.values():
             player.draw(win)
 
     def update_state(self):
         self.local_player.update(self.game_data.grid)
 
-        # self.update_player_in_game_obj()
         self.fetch_data_from_server()
 
         for event in pygame.event.get():
@@ -43,19 +48,22 @@ class Game:
                 sys.exit(0)
         return self
 
-    # def update_player_in_game_obj(self):
-    #     self.game_data.players[self.player_id].x = self.local_player.rect.x
-    #     self.game_data.players[self.player_id].y = self.local_player.rect.y
-
     def fetch_data_from_server(self):
-        self.client.send(pickle.dumps(
-            PlayerDataObject(self.local_player.id, self.local_player.rect.x, self.local_player.rect.y)
-        ))
+        if self.is_player_alive:
+            self.client.send(pickle.dumps(
+                PlayerDataObject(self.local_player.id, self.local_player.rect.x, self.local_player.rect.y)
+            ))
         self.game_data = pickle.loads(self.client.recv(8*4096))
-        print(self.game_data.players)
+        ids = []
         for p_id, player_obj in self.game_data.players.items():
+            ids.append(p_id)
             if p_id not in self.players:
                 self.players.setdefault(int(p_id), Player(p_id, player_obj.x, player_obj.y))
             if p_id != self.player_id:
                 self.players[p_id].rect.x = player_obj.x
                 self.players[p_id].rect.y = player_obj.y
+
+        for p_id in self.players.keys():
+            if p_id not in ids:
+                self.players.pop(p_id)
+                break
