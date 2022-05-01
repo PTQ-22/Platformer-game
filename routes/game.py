@@ -4,6 +4,7 @@ import socket
 import pygame
 import sys
 from player.player import Player
+from player.player_data_object import PlayerDataObject
 from server.game_data_object import GameDataObject
 
 
@@ -33,7 +34,7 @@ class Game:
     def update_state(self):
         self.local_player.update(self.game_data.grid)
 
-        self.update_player_in_game_obj()
+        # self.update_player_in_game_obj()
         self.fetch_data_from_server()
 
         for event in pygame.event.get():
@@ -42,12 +43,14 @@ class Game:
                 sys.exit(0)
         return self
 
-    def update_player_in_game_obj(self):
-        self.game_data.players[self.player_id].x = self.local_player.rect.x
-        self.game_data.players[self.player_id].y = self.local_player.rect.y
+    # def update_player_in_game_obj(self):
+    #     self.game_data.players[self.player_id].x = self.local_player.rect.x
+    #     self.game_data.players[self.player_id].y = self.local_player.rect.y
 
     def fetch_data_from_server(self):
-        self.client.send(pickle.dumps(self.game_data))
+        self.client.send(pickle.dumps(
+            PlayerDataObject(self.local_player.id, self.local_player.rect.x, self.local_player.rect.y)
+        ))
         self.game_data = pickle.loads(self.client.recv(8*4096))
         print(self.game_data.players)
         for p_id, player_obj in self.game_data.players.items():

@@ -26,3 +26,6 @@ class GameDataObject:
 
     def add_player(self, player_id: int):
         self.players.setdefault(player_id, PlayerDataObject(player_id))
+
+    def update(self, player: PlayerDataObject):
+        self.players[player.id] = player
