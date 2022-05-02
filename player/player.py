@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, List
 
 import pygame
 
@@ -7,43 +7,101 @@ class Player:
 
     def __init__(self, player_id: int, x: int, y: int):
         self.id = player_id
-        img = pygame.image.load("res/player_1.png").convert_alpha()
-        self.image = pygame.transform.scale(img, (38, 63))
-        # self.image = pygame.transform.scale(img, (60, 100))
-        self.rect = self.image.get_rect(center=(x, y))
+
+        img_right = pygame.image.load("res/player_1_right.png").convert_alpha()
+        img_left = pygame.image.load("res/player_1_left.png").convert_alpha()
+        self.image_right = pygame.transform.scale(img_right, (38, 63))
+        self.image_left = pygame.transform.scale(img_right, (38, 63))
+        # self.image_right = pygame.transform.scale(img_right, (60, 100))
+        # self.image_left = pygame.transform.scale(img_left, (60, 100))
+
+        self.rect = self.image_right.get_rect(center=(x, y))
+        self.attack_rect = pygame.Rect(
+            self.rect.centerx, self.rect.centery, self.rect.width - self.rect.width // 3, self.rect.width // 2
+        )
+        self.direction = "right"
+
         self.speed = 1
         self.gravity_speed = 1
         self.jump_val = 0
         self.can_jump = True
+        self.is_hit = False
 
     def draw(self, win: pygame.Surface):
-        win.blit(self.image, self.rect)
-        pygame.draw.circle(win, (255, 0, 0), self.rect.center, 3)
+        if self.direction == "right":
+            win.blit(self.image_right, self.rect)
+        elif self.direction == "left":
+            win.blit(self.image_left, self.rect)
 
-    def key_handler(self, blocks_state: Set[str]):
+        # TEST TODO remove
+        if self.is_hit:
+            pygame.draw.circle(win, (255, 0, 0), self.rect.center, 3)
+        # pygame.draw.rect(win, (100, 0, 0), self.attack_rect)
+
+    def key_handler(self, blocks_state: Set[str], players) -> List[int]:
+        """
+            handle all player's keyboard events
+            :return list of hit enemies ids
+        """
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             if 'right' not in blocks_state and self.rect.right < 1000:
                 self.rect.x += self.speed
+                self.direction = "right"
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             if 'left' not in blocks_state and self.rect.x > 0:
                 self.rect.x -= self.speed
-        if keys[pygame.K_SPACE] and ('on' in blocks_state) and self.can_jump:
+                self.direction = "left"
+        if (keys[pygame.K_UP] or keys[pygame.K_w]) and ('on' in blocks_state) and self.can_jump:
             self.jump_val = 150
             self.can_jump = False
+        if keys[pygame.K_SPACE]:
+            return self.check_for_hit_players(players)
+        return []
 
-    def update(self, grid):
+    def check_for_hit_players(self, players):
+        hit_players_ids = []
+        for player in players:
+            if self.attack_rect.colliderect(player.rect) and player.id != self.id:
+                hit_players_ids.append(player.id)
+        return hit_players_ids
+
+    def update(self, grid, players) -> List[int]:
+        """
+            update -> method call in game
+            updates local player's position, control keyboard and gravity
+            :return list of hit enemies ids by this player
+        """
         blocks_state = self.is_on_block(grid)
-        self.key_handler(blocks_state)
+        hit_players_ids = self.key_handler(blocks_state, players)
+        # gravity
         if 'on' not in blocks_state and self.rect.y - 10 < 750:
             self.rect.y += self.gravity_speed
-
+        # jump
         if self.jump_val > 0:
             self.jump_val -= 3
             if 'top' not in blocks_state:
                 self.rect.y -= 3
         else:
             self.can_jump = True
+
+        if self.is_hit:
+            self.jump_val = 50
+            self.is_hit = False
+            self.can_jump = False
+
+        # change attack rect
+        if self.direction == "right":
+            self.attack_rect.update(
+                self.rect.centerx, self.rect.centery, self.attack_rect.width, self.attack_rect.height
+            )
+        elif self.direction == "left":
+            self.attack_rect.update(
+                self.rect.centerx - self.rect.width + self.rect.width // 3,
+                self.rect.centery, self.attack_rect.width, self.attack_rect.height
+            )
+
+        return hit_players_ids
 
     def is_on_block(self, grid) -> Set[str]:
         states = set()

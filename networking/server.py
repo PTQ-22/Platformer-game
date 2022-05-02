@@ -34,6 +34,8 @@ def threaded_client(conn: socket.socket, player_id: int):
 
 def grid_controller():
     game_obj = games[1]
+    while len(game_obj.players) < 2:
+        time.sleep(1)
     while game_obj.time_to_start > 0:
         time.sleep(1)
         game_obj.time_to_start -= 1

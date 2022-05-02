@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from player.player_data_object import PlayerDataObject
 from utils.field import Field
@@ -7,7 +7,7 @@ from utils.field import Field
 class GameDataObject:
 
     def __init__(self):
-        self.players = {}
+        self.players: Dict[int, PlayerDataObject] = {}
         self.grid: List[List[Field]] = []
         self.field_size = 50
         self.alive = 0
@@ -39,7 +39,18 @@ class GameDataObject:
         self.alive -= 1
 
     def update(self, player: PlayerDataObject):
+
+        if len(player.hit_players_ids) > 0:
+            for p_id in player.hit_players_ids:
+                self.players[p_id].is_hit = True
+                # print(self.players[p_id].is_hit)
+            player.hit_players_ids = None
+
         if player.y < 750:
-            self.players[player.id] = player
+            self.players[player.id].x = player.x
+            self.players[player.id].y = player.y
         elif player.id in self.players:
             self.remove_player(player.id)
+
+        if player.updated_hit:
+            self.players[player.id].is_hit = False
