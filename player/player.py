@@ -9,6 +9,7 @@ class Player:
         self.id = player_id
         img = pygame.image.load("res/player_1.png").convert_alpha()
         self.image = pygame.transform.scale(img, (38, 63))
+        # self.image = pygame.transform.scale(img, (60, 100))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 1
         self.gravity_speed = 1

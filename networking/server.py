@@ -3,7 +3,7 @@ import socket
 import time
 from _thread import *
 import pickle
-from server.game_data_object import GameDataObject
+from networking.game_data_object import GameDataObject
 
 game_data_obj = GameDataObject()
 games = {1: game_data_obj}
@@ -35,7 +35,7 @@ def threaded_client(conn: socket.socket, player_id: int):
 def grid_controller():
     game_obj = games[1]
     while True:
-        print(game_obj.players)
+        # print(game_obj.players)
         for i in range(20):
             for j in range(14):
                 if game_obj.grid[i][j].type == '#':
