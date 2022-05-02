@@ -11,6 +11,8 @@ class GameDataObject:
         self.grid: List[List[Field]] = []
         self.field_size = 50
         self.alive = 0
+        self.time_to_start = 10
+        self.winner = None
         self.make_grid()
 
     def make_grid(self):

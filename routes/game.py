@@ -1,23 +1,14 @@
-import pickle
-import socket
-
 import pygame
 import sys
 
 from networking.client import Client
 from player.player import Player
 from player.player_data_object import PlayerDataObject
-from networking.game_data_object import GameDataObject
 
 
 class Game:
 
     def __init__(self):
-        #
-        # self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.client.connect(("127.0.0.1", 6666))
-        # self.player_id = int(self.client.recv(8*4096).decode("utf-8"))
-        # self.game_data: GameDataObject = pickle.loads(self.client.recv(8*4096))
 
         self.client = Client()
         self.player_id, self.game_data = self.client.first_communication()
@@ -31,12 +22,20 @@ class Game:
         self.font = pygame.font.Font("freesansbold.ttf", 50)
 
     def draw(self, win: pygame.Surface):
-        text_obj = self.font.render(str(self.game_data.alive), False, (0, 0, 0))
         for row in self.game_data.grid:
             for field in row:
                 field.draw(win)
 
+        text_obj = self.font.render(str(self.game_data.alive), False, (0, 0, 0))
         win.blit(text_obj, (20, 20))
+
+        if self.game_data.time_to_start > 0:
+            time_test_obj = self.font.render(str(self.game_data.time_to_start), False, (0, 0, 0))
+            win.blit(time_test_obj, (400, 20))
+
+        if self.game_data.winner is not None:
+            winner_text_obj = self.font.render(f"Winner: {self.game_data.winner.id}", False, (0, 0, 0))
+            win.blit(winner_text_obj, (600, 20))
 
         for player in self.players.values():
             player.draw(win)

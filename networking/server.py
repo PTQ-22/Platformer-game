@@ -34,7 +34,11 @@ def threaded_client(conn: socket.socket, player_id: int):
 
 def grid_controller():
     game_obj = games[1]
-    while True:
+    while game_obj.time_to_start > 0:
+        time.sleep(1)
+        game_obj.time_to_start -= 1
+
+    while len(game_obj.players) > 1:
         # print(game_obj.players)
         for i in range(20):
             for j in range(14):
@@ -49,6 +53,8 @@ def grid_controller():
                         # print(f"color changed to {game_obj.grid[i][j].color}")
                     else:
                         game_obj.grid[i][j].color = (255, 255, 255)
+    for p_id in game_obj.players.keys():
+        game_obj.winner = game_obj.players[p_id]
 
 
 def main():
