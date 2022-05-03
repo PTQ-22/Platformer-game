@@ -46,7 +46,7 @@ def grid_controller():
             for j in range(14):
                 if game_obj.grid[i][j].type == '#':
                     if game_obj.grid[i][j].color[0] + game_obj.grid[i][j].multiplier < 255:
-                        time.sleep(0.05)
+                        time.sleep(0.03)
                         game_obj.grid[i][j].color = (
                             game_obj.grid[i][j].color[0] + game_obj.grid[i][j].multiplier,
                             0,

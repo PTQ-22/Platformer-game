@@ -49,6 +49,8 @@ class GameDataObject:
         if player.y < 750:
             self.players[player.id].x = player.x
             self.players[player.id].y = player.y
+            self.players[player.id].is_moving = player.is_moving
+            self.players[player.id].direction = player.direction
         elif player.id in self.players:
             self.remove_player(player.id)
 

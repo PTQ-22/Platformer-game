@@ -10,7 +10,7 @@ class Field:
         self.rect = pygame.Rect(x, y, size, size)
         self.color: Tuple[int, int, int] = (255, 255, 255)
         self.type = '.'
-        self.multiplier = int(random.randint(1, 100) / (y // size + 2))
+        self.multiplier = max(int(random.randint(1, 100) / (y // size + 2)), 1)
 
     def draw(self, win: pygame.Surface):
         pygame.draw.rect(win, self.color, self.rect)

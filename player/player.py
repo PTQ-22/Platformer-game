@@ -2,6 +2,7 @@ from typing import Set, List, Tuple
 
 import pygame
 
+from player.animation_controller import AnimationController
 from player.hit_controller import HitController
 from player.jump_controller import JumpController
 
@@ -11,14 +12,17 @@ class Player:
     def __init__(self, player_id: int, x: int, y: int):
         self.id = player_id
 
-        img_right = pygame.image.load("res/player_1_right.png").convert_alpha()
-        img_left = pygame.image.load("res/player_1_left.png").convert_alpha()
+        img_right = pygame.image.load("res/player/player_1_right.png").convert_alpha()
+        img_left = pygame.image.load("res/player/player_1_left.png").convert_alpha()
         self.image_right = pygame.transform.scale(img_right, (38, 63))
         self.image_left = pygame.transform.scale(img_left, (38, 63))
         # self.image_right = pygame.transform.scale(img_right, (60, 100))
         # self.image_left = pygame.transform.scale(img_left, (60, 100))
+        self.animation_controller = AnimationController()
+        self.is_moving = False
 
         self.rect = self.image_right.get_rect(center=(x, y))
+
         self.attack_rect = pygame.Rect(
             self.rect.centerx, self.rect.centery, self.rect.width - self.rect.width // 3, self.rect.width // 2
         )
@@ -31,10 +35,13 @@ class Player:
         self.hit_controller = HitController()
 
     def draw(self, win: pygame.Surface):
-        if self.direction == "right":
-            win.blit(self.image_right, self.rect)
-        elif self.direction == "left":
-            win.blit(self.image_left, self.rect)
+        if self.is_moving:
+            self.animation_controller.animate(win, self.rect, self.direction)
+        else:
+            if self.direction == "right":
+                win.blit(self.image_right, self.rect)
+            elif self.direction == "left":
+                win.blit(self.image_left, self.rect)
 
     def key_handler(self, blocks_state: Set[str], players) -> List[Tuple[int, str]]:
         """
@@ -46,10 +53,14 @@ class Player:
             if 'right' not in blocks_state and self.rect.right < 1000:
                 self.rect.x += self.speed
                 self.direction = "right"
-        if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+                self.is_moving = True
+        elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
             if 'left' not in blocks_state and self.rect.x > 0:
                 self.rect.x -= self.speed
                 self.direction = "left"
+                self.is_moving = True
+        else:
+            self.is_moving = False
         if (keys[pygame.K_UP] or keys[pygame.K_w]) and ('on' in blocks_state) and self.jump_controller.can_jump:
             self.jump_controller.start_jump()
         if keys[pygame.K_SPACE]:

@@ -43,8 +43,7 @@ class Game:
 
     def update_state(self):
         hit_players_data = self.local_player.update(self.game_data.grid, self.players.values())
-        if len(hit_players_data) > 0:
-            print(hit_players_data)
+
         self.fetch_data_from_server(hit_players_data)
 
         self.update_players_with_server_data()
@@ -59,7 +58,8 @@ class Game:
         if self.is_player_alive:
             self.client.send_player_data_obj(
                 PlayerDataObject(self.player_id, self.local_player.rect.x, self.local_player.rect.y,
-                                 hit_players_data, self.updated_hit)
+                                 hit_players_data, self.updated_hit,
+                                 self.local_player.is_moving, self.local_player.direction)
             )
         self.game_data = self.client.recv_data()
 
@@ -72,12 +72,15 @@ class Game:
             if p_id != self.player_id:
                 self.players[p_id].rect.x = player_obj.x
                 self.players[p_id].rect.y = player_obj.y
+                self.players[p_id].is_moving = player_obj.is_moving
+                self.players[p_id].direction = player_obj.direction
 
-        if self.game_data.players[self.local_player.id].is_hit:
-            self.local_player.hit_controller.start_hit(self.game_data.players[self.local_player.id].hit_direction)
-            self.updated_hit = True
-        else:
-            self.updated_hit = False
+        if self.local_player.id in self.game_data.players:
+            if self.game_data.players[self.local_player.id].is_hit:
+                self.local_player.hit_controller.start_hit(self.game_data.players[self.local_player.id].hit_direction)
+                self.updated_hit = True
+            else:
+                self.updated_hit = False
 
         for p_id in self.players.keys():
             if p_id not in ids:
