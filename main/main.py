@@ -10,7 +10,9 @@ def main():
 
     route = Menu(win_size)
 
+    clock = pygame.time.Clock()
     while True:
+        clock.tick(120)
 
         route.draw(win)
 

@@ -1,6 +1,7 @@
 import random
 import socket
 import time
+import json
 from _thread import *
 import pickle
 from networking.game_data_object import GameDataObject
@@ -12,8 +13,8 @@ games = {1: game_data_obj}
 def threaded_client(conn: socket.socket, player_id: int):
     game_obj = games[1]
     game_obj.add_player(player_id, random.randint(10, 940))
-    conn.send(f"{player_id}".encode('utf-8'))
-    conn.send(pickle.dumps(game_obj))
+    conn.sendall(f"{player_id}".encode('utf-8'))
+    conn.sendall(pickle.dumps(game_obj))
     while True:
         try:
             try:
@@ -60,8 +61,12 @@ def grid_controller():
 
 
 def main():
-    ip = "127.0.0.1"
-    port = 6666
+
+    with open("config.json") as config_file:
+        network_data = json.loads(config_file.read())
+        ip = network_data['ip']
+        port = network_data['port']
+
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         s.bind((ip, port))

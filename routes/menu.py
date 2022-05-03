@@ -2,37 +2,42 @@ import sys
 from typing import Tuple
 import pygame
 
-from routes.game import Game
+from routes.multiplayer import MultiplayerGame
+from routes.route import Route
+from routes.singleplayer import Singleplayer
 from utils.button import Button
 
 
-class Menu:
+class Menu(Route):
 
     def __init__(self, win_size: Tuple[int, int]):
         self.color = (200, 200, 200)  # TODO change to picture
         self.buttons = [
+            Button("SINGLEPLAYER", 40,
+                   (win_size[0] // 2 - 200, win_size[1] // 2 - 300, 400, 100),
+                   (0, 200, 100), (0, 150, 100)),
             Button(
-                "PLAY", 40,
-                (win_size[0] // 2 - 150, win_size[1] // 2 - 100, 300, 200),
-                (200, 0, 100), (150, 0, 50)
+                "MULTIPLAYER", 40,
+                (win_size[0] // 2 - 200, win_size[1] // 2 - 100, 400, 100),
+                (200, 100, 100), (150, 100, 100)
             ),
-            # Button("", 0, (100, 400, 60, 100), (0, 200, 100), (0, 200, 100))
         ]
 
-    def draw(self, win: pygame.Surface):
+    def draw(self, win: pygame.Surface) -> None:
         win.fill(self.color)
 
         for button in self.buttons:
             button.draw(win)
 
-    def update_state(self):
+    def update_state(self) -> 'Route':
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
-            for button in self.buttons:  # TODO
-                if button.is_mouse(event):
-                    return Game()
+            if self.buttons[0].is_mouse(event):
+                return Singleplayer()
+            if self.buttons[1].is_mouse(event):
+                return MultiplayerGame()
 
         return self

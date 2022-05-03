@@ -4,9 +4,10 @@ import sys
 from networking.client import Client
 from player.player import Player
 from player.player_data_object import PlayerDataObject
+from routes.route import Route
 
 
-class Game:
+class MultiplayerGame(Route):
 
     def __init__(self):
 
@@ -22,7 +23,7 @@ class Game:
         self.updated_hit = False
         self.font = pygame.font.Font("freesansbold.ttf", 50)
 
-    def draw(self, win: pygame.Surface):
+    def draw(self, win: pygame.Surface) -> None:
         for row in self.game_data.grid:
             for field in row:
                 field.draw(win)
@@ -41,7 +42,7 @@ class Game:
         for player in self.players.values():
             player.draw(win)
 
-    def update_state(self):
+    def update_state(self) -> 'Route':
         hit_players_data = self.local_player.update(self.game_data.grid, self.players.values())
 
         self.fetch_data_from_server(hit_players_data)

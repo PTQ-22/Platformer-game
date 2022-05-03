@@ -31,7 +31,7 @@ class Player:
         )
         self.direction = "right"
 
-        self.speed = 1
+        self.speed = 2
         self.gravity_speed = 1
 
         self.jump_controller = JumpController()
