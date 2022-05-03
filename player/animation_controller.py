@@ -6,7 +6,7 @@ class AnimationController:
     IMAGE_WIDTH = 38
     IMAGE_HEIGHT = 63
 
-    ANIMATION_COUNTER_MAX = 20
+    ANIMATION_COUNTER_MAX = 30
 
     def __init__(self):
         self.right_images = []
@@ -18,11 +18,11 @@ class AnimationController:
             self.left_images.append(pygame.transform.scale(img_left, (self.IMAGE_WIDTH, self.IMAGE_HEIGHT)))
         self.animation_counter = 0
 
-    def animate(self, win: pygame.Surface, rect: pygame.Rect, direction: str):
+    def animate_walk(self, win: pygame.Surface, rect: pygame.Rect, direction: str):
         self.animation_counter += 1
         if self.animation_counter > self.ANIMATION_COUNTER_MAX:
             self.animation_counter = 0
         if direction == "right":
-            win.blit(self.right_images[self.animation_counter % self.NUM_OF_IMAGES], rect)
+            win.blit(self.right_images[self.animation_counter // 10], rect)
         elif direction == "left":
-            win.blit(self.left_images[self.animation_counter % self.NUM_OF_IMAGES], rect)
+            win.blit(self.left_images[self.animation_counter // 10], rect)

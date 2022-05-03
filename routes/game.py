@@ -59,7 +59,7 @@ class Game:
             self.client.send_player_data_obj(
                 PlayerDataObject(self.player_id, self.local_player.rect.x, self.local_player.rect.y,
                                  hit_players_data, self.updated_hit,
-                                 self.local_player.is_moving, self.local_player.direction)
+                                 self.local_player.is_moving, self.local_player.direction, self.local_player.arm_up)
             )
         self.game_data = self.client.recv_data()
 
@@ -74,6 +74,8 @@ class Game:
                 self.players[p_id].rect.y = player_obj.y
                 self.players[p_id].is_moving = player_obj.is_moving
                 self.players[p_id].direction = player_obj.direction
+                if player_obj.arm_up:
+                    self.players[p_id].arms_controller.start_animation(player_obj.direction)
 
         if self.local_player.id in self.game_data.players:
             if self.game_data.players[self.local_player.id].is_hit:

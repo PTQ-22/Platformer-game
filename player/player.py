@@ -3,6 +3,7 @@ from typing import Set, List, Tuple
 import pygame
 
 from player.animation_controller import AnimationController
+from player.arms_controller import ArmsController
 from player.hit_controller import HitController
 from player.jump_controller import JumpController
 
@@ -22,6 +23,8 @@ class Player:
         self.is_moving = False
 
         self.rect = self.image_right.get_rect(center=(x, y))
+        self.arms_controller = ArmsController(self.rect)
+        self.arm_up = False
 
         self.attack_rect = pygame.Rect(
             self.rect.centerx, self.rect.centery, self.rect.width - self.rect.width // 3, self.rect.width // 2
@@ -36,12 +39,15 @@ class Player:
 
     def draw(self, win: pygame.Surface):
         if self.is_moving:
-            self.animation_controller.animate(win, self.rect, self.direction)
+            self.animation_controller.animate_walk(win, self.rect, self.direction)
         else:
             if self.direction == "right":
                 win.blit(self.image_right, self.rect)
             elif self.direction == "left":
                 win.blit(self.image_left, self.rect)
+
+        self.arms_controller.update_rect_pos(self.rect)
+        self.arms_controller.draw_arms(win)
 
     def key_handler(self, blocks_state: Set[str], players) -> List[Tuple[int, str]]:
         """
@@ -64,7 +70,11 @@ class Player:
         if (keys[pygame.K_UP] or keys[pygame.K_w]) and ('on' in blocks_state) and self.jump_controller.can_jump:
             self.jump_controller.start_jump()
         if keys[pygame.K_SPACE]:
+            self.arms_controller.start_animation(self.direction)
+            self.arm_up = True
             return self.check_for_hit_players(players)
+        else:
+            self.arm_up = False
         return []
 
     def check_for_hit_players(self, players):

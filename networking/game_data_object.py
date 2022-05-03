@@ -51,6 +51,7 @@ class GameDataObject:
             self.players[player.id].y = player.y
             self.players[player.id].is_moving = player.is_moving
             self.players[player.id].direction = player.direction
+            self.players[player.id].arm_up = player.arm_up
         elif player.id in self.players:
             self.remove_player(player.id)
 
