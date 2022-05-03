@@ -41,9 +41,9 @@ class GameDataObject:
     def update(self, player: PlayerDataObject):
 
         if len(player.hit_players_ids) > 0:
-            for p_id in player.hit_players_ids:
-                self.players[p_id].is_hit = True
-                # print(self.players[p_id].is_hit)
+            for p_hit_tuple in player.hit_players_ids:
+                self.players[p_hit_tuple[0]].is_hit = True
+                self.players[p_hit_tuple[0]].hit_direction = p_hit_tuple[1]
             player.hit_players_ids = None
 
         if player.y < 750:
@@ -54,3 +54,4 @@ class GameDataObject:
 
         if player.updated_hit:
             self.players[player.id].is_hit = False
+            self.players[player.id].hit_direction = None
