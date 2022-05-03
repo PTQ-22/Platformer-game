@@ -2,6 +2,9 @@ from typing import Set, List, Tuple
 
 import pygame
 
+from player.hit_controller import HitController
+from player.jump_controller import JumpController
+
 
 class Player:
 
@@ -23,22 +26,15 @@ class Player:
 
         self.speed = 1
         self.gravity_speed = 1
-        self.jump_val = 0
-        self.hit_val = 0
-        self.can_jump = True
-        self.is_hit = False
-        self.hit_direction = None
+
+        self.jump_controller = JumpController()
+        self.hit_controller = HitController()
 
     def draw(self, win: pygame.Surface):
         if self.direction == "right":
             win.blit(self.image_right, self.rect)
         elif self.direction == "left":
             win.blit(self.image_left, self.rect)
-
-        # TEST TODO remove
-        if self.is_hit:
-            pygame.draw.circle(win, (255, 0, 0), self.rect.center, 3)
-        # pygame.draw.rect(win, (100, 0, 0), self.attack_rect)
 
     def key_handler(self, blocks_state: Set[str], players) -> List[Tuple[int, str]]:
         """
@@ -54,9 +50,8 @@ class Player:
             if 'left' not in blocks_state and self.rect.x > 0:
                 self.rect.x -= self.speed
                 self.direction = "left"
-        if (keys[pygame.K_UP] or keys[pygame.K_w]) and ('on' in blocks_state) and self.can_jump:
-            self.jump_val = 150
-            self.can_jump = False
+        if (keys[pygame.K_UP] or keys[pygame.K_w]) and ('on' in blocks_state) and self.jump_controller.can_jump:
+            self.jump_controller.start_jump()
         if keys[pygame.K_SPACE]:
             return self.check_for_hit_players(players)
         return []
@@ -76,31 +71,21 @@ class Player:
         """
         blocks_state = self.is_on_block(grid)
         hit_players_data = self.key_handler(blocks_state, players)
+
         # gravity
         if 'on' not in blocks_state and self.rect.y - 10 < 750:
             self.rect.y += self.gravity_speed
+
         # jump
-        if self.jump_val > 0:
-            self.jump_val -= 3
-            if 'top' not in blocks_state:
-                self.rect.y -= 3
-        else:
-            self.can_jump = True
-
+        self.jump_controller.work(self, blocks_state)
         # other player hit
-        if self.is_hit:
-            self.jump_val = 50
-            self.hit_val = 150
-            self.is_hit = False
-            self.can_jump = False
-        if self.hit_val > 0:
-            self.hit_val -= 3
-            if self.hit_direction == "right" and "right" not in blocks_state and self.rect.right < 1000:
-                self.rect.x += 3
-            elif self.hit_direction == "left" and "left" not in blocks_state and self.rect.x > 0:
-                self.rect.x -= 3
-
+        self.hit_controller.work(self, blocks_state)
         # change attack rect
+        self.update_attack_rect()
+
+        return hit_players_data
+
+    def update_attack_rect(self):
         if self.direction == "right":
             self.attack_rect.update(
                 self.rect.centerx, self.rect.centery, self.attack_rect.width, self.attack_rect.height
@@ -110,8 +95,6 @@ class Player:
                 self.rect.centerx - self.rect.width + self.rect.width // 3,
                 self.rect.centery, self.attack_rect.width, self.attack_rect.height
             )
-
-        return hit_players_data
 
     def is_on_block(self, grid) -> Set[str]:
         states = set()

@@ -73,15 +73,13 @@ class Game:
                 self.players[p_id].rect.x = player_obj.x
                 self.players[p_id].rect.y = player_obj.y
 
-        for p_id in self.players.keys():
-            if p_id not in ids:
-                self.players.pop(p_id)
-                break
-
         if self.game_data.players[self.local_player.id].is_hit:
-            self.local_player.is_hit = True
-            self.local_player.hit_direction = self.game_data.players[self.local_player.id].hit_direction
+            self.local_player.hit_controller.start_hit(self.game_data.players[self.local_player.id].hit_direction)
             self.updated_hit = True
         else:
             self.updated_hit = False
 
+        for p_id in self.players.keys():
+            if p_id not in ids:
+                self.players.pop(p_id)
+                break
