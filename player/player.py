@@ -32,6 +32,7 @@ class Player:
         self.direction = "right"
 
         self.speed = 2
+        print('yy')
         self.gravity_speed = 1
 
         self.jump_controller = JumpController()
@@ -123,14 +124,14 @@ class Player:
             for field in row:
                 collision = self.rect.colliderect(field.rect)
                 if (collision and self.rect.bottom < field.rect.y + 5) \
-                        and field.color != (255, 255, 255):
+                        and field.type == '#':
                     states.add('on')
-                elif collision and field.color != (255, 255, 255):
+                elif collision and field.type == '#':
                     if self.rect.x > field.rect.x:
                         states.add('left')
                     else:
                         states.add('right')
                 head_collision = field.rect.collidepoint(self.rect.midtop)
-                if head_collision and field.color != (255, 255, 255):
+                if head_collision and field.type == '#':
                     states.add('top')
         return states
