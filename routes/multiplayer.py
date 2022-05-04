@@ -10,44 +10,64 @@ from routes.route import Route
 class MultiplayerGame(Route):
 
     def __init__(self):
-
-        self.client = Client()
-        self.player_id, self.game_data = self.client.first_communication()
-
+        self.client = None
+        self.player_id = None
+        self.game_data = None
         self.players = {}
-        for p_id, player_obj in self.game_data.players.items():
-            self.players.setdefault(int(p_id), Player(p_id, player_obj.x, player_obj.y))
-
-        self.local_player: Player = self.players[self.player_id]
+        self.local_player = None
         self.is_player_alive = True
         self.updated_hit = False
+        try:
+            self.try_to_connect_and_init()
+        except ConnectionRefusedError:
+            self.phase = 'waiting'
+
         self.font = pygame.font.Font("freesansbold.ttf", 50)
 
+    def try_to_connect_and_init(self):
+        self.client = Client()
+        self.phase = 'game'
+        self.player_id, self.game_data = self.client.first_communication()
+        for p_id, player_obj in self.game_data.players.items():
+            self.players.setdefault(int(p_id), Player(p_id, player_obj.x, player_obj.y))
+        self.local_player: Player = self.players[self.player_id]
+
     def draw(self, win: pygame.Surface) -> None:
-        for row in self.game_data.grid:
-            for field in row:
-                field.draw(win)
+        if self.phase == 'game':
+            for row in self.game_data.grid:
+                for field in row:
+                    field.draw(win)
 
-        text_obj = self.font.render(str(self.game_data.alive), False, (0, 0, 0))
-        win.blit(text_obj, (20, 20))
+            text_obj = self.font.render(str(self.game_data.alive), False, (0, 0, 0))
+            win.blit(text_obj, (20, 20))
 
-        if self.game_data.time_to_start > 0:
-            time_test_obj = self.font.render(str(self.game_data.time_to_start), False, (0, 0, 0))
-            win.blit(time_test_obj, (400, 20))
+            if self.game_data.time_to_start > 0:
+                time_test_obj = self.font.render(str(self.game_data.time_to_start), False, (0, 0, 0))
+                win.blit(time_test_obj, (400, 20))
 
-        if self.game_data.winner is not None:
-            winner_text_obj = self.font.render(f"Winner: {self.game_data.winner.id}", False, (0, 0, 0))
-            win.blit(winner_text_obj, (600, 20))
+            if self.game_data.winner is not None:
+                winner_text_obj = self.font.render(f"Winner: {self.game_data.winner.id}", False, (0, 0, 0))
+                win.blit(winner_text_obj, (600, 20))
 
-        for player in self.players.values():
-            player.draw(win)
+            for player in self.players.values():
+                player.draw(win)
+        elif self.phase == 'waiting':
+            win.fill((200, 200, 200))
+            text_obj = self.font.render("Waiting for connection...", False, (0, 0, 0))
+            win.blit(text_obj, (200, 250))
 
     def update_state(self) -> 'Route':
-        hit_players_data = self.local_player.update(self.game_data.grid, self.players.values())
+        if self.phase == 'game':
+            hit_players_data = self.local_player.update(self.game_data.grid, self.players.values())
 
-        self.fetch_data_from_server(hit_players_data)
+            self.fetch_data_from_server(hit_players_data)
 
-        self.update_players_with_server_data()
+            self.update_players_with_server_data()
+        else:
+            try:
+                self.try_to_connect_and_init()
+            except ConnectionRefusedError:
+                self.phase = 'waiting'
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
