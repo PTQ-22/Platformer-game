@@ -15,7 +15,7 @@ class JumpController:
     def work(self, player, blocks_state: Set[str]):
         if self.jump_val > 0:
             self.jump_val -= self.JUMP_SPEED
-            if 'top' not in blocks_state:
+            if 'top' not in blocks_state and player.rect.y > -20:
                 player.rect.y -= self.JUMP_SPEED
         else:
             self.can_jump = True
