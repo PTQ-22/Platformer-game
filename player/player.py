@@ -25,6 +25,7 @@ class Player:
         self.rect = self.image_right.get_rect(center=(x, y))
         self.arms_controller = ArmsController(self.rect)
         self.arm_up = False
+        self.r_pressed = False
 
         self.attack_rect = pygame.Rect(
             self.rect.centerx, self.rect.centery, self.rect.width - self.rect.width // 3, self.rect.width // 2
@@ -70,11 +71,15 @@ class Player:
         if (keys[pygame.K_UP] or keys[pygame.K_w]) and ('on' in blocks_state) and self.jump_controller.can_jump:
             self.jump_controller.start_jump()
         if keys[pygame.K_SPACE]:
-            self.arms_controller.start_animation(self.direction)
+            self.arms_controller.start_animation(self.direction, self.r_pressed)
             self.arm_up = True
             return self.check_for_hit_players(players)
         else:
             self.arm_up = False
+        if keys[pygame.K_r]:
+            self.r_pressed = True
+        else:
+            self.r_pressed = False
         return []
 
     def check_for_hit_players(self, players):

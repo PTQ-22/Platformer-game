@@ -46,10 +46,10 @@ class ArmsController:
         self.right_arm = Arm(
             rect.x + rect.width - rect.width // 6, rect.centery - rect.width // 5, rect.width // 6, rect.height // 3)
 
-    def start_animation(self, direction: str):
-        if direction == "right":
+    def start_animation(self, direction: str, r_pressed: bool):
+        if (direction == "right" and not r_pressed) or (direction == 'left' and r_pressed):
             self.right_arm.start_animation()
-        elif direction == "left":
+        elif (direction == "left" and not r_pressed) or (direction == 'right' and r_pressed):
             self.left_arm.start_animation()
 
     def animate(self, rect: pygame.Rect):

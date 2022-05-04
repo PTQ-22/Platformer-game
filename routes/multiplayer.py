@@ -96,7 +96,7 @@ class MultiplayerGame(Route):
                 self.players[p_id].is_moving = player_obj.is_moving
                 self.players[p_id].direction = player_obj.direction
                 if player_obj.arm_up:
-                    self.players[p_id].arms_controller.start_animation(player_obj.direction)
+                    self.players[p_id].arms_controller.start_animation(player_obj.direction, False)
 
         if self.local_player.id in self.game_data.players:
             if self.game_data.players[self.local_player.id].is_hit:

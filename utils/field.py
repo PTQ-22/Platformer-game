@@ -15,6 +15,9 @@ class Field:
     def draw(self, win: pygame.Surface):
         if self.type == 'b':
             pygame.draw.rect(win, (150, 0, 0), self.rect)
+        elif self.type == 'A':
+            pygame.draw.rect(win, self.color, self.rect)
+            pygame.draw.polygon(win, (50, 50, 50), [self.rect.bottomleft, self.rect.midtop, self.rect.bottomright])
         else:
             pygame.draw.rect(win, self.color, self.rect)
         # pygame.draw.rect(win, (0, 0, 0), self.rect, 1)
