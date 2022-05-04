@@ -14,7 +14,7 @@ class Field:
 
     def draw(self, win: pygame.Surface):
         if self.type == 'b':
-            pygame.draw.rect(win, (255, 0, 0), self.rect)
+            pygame.draw.rect(win, (150, 0, 0), self.rect)
         else:
             pygame.draw.rect(win, self.color, self.rect)
         # pygame.draw.rect(win, (0, 0, 0), self.rect, 1)
