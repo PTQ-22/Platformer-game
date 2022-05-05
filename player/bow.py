@@ -39,7 +39,6 @@ class FlyArrow:
         self.image = img
         self.rect = rect
         self.angle = self.set_angle(mouse_pos)
-        print(f"deg {math.degrees(self.angle)}")
         self.speed = 10
 
     def draw(self, win: pygame.Surface):
@@ -48,10 +47,6 @@ class FlyArrow:
     def move(self):
         self.rect.centerx += (self.speed * math.cos(self.angle))
         self.rect.centery += (self.speed * math.sin(self.angle))
-    # def move(self):
-    #     vect = pygame.math.Vector2()
-    #     vect.from_polar((self.speed, math.degrees(self.angle)))
-    #     self.rect.center += vect
 
     def set_angle(self, mouse_pos: Tuple[int, int]):
         x = self.rect.centerx

@@ -6,51 +6,82 @@ import pygame
 from player.local_player import LocalPlayer
 from routes.route import Route
 from utils.coin import Coin
-from utils.field import Field
 from utils.level_bar import LevelBar
+from utils.tile import Tile, TileImages
 
 
 class Singleplayer(Route):
 
     def __init__(self):
-        self.grid: List[List[Field]] = []
-        self.danger_fields: List[Field] = []
+        tile_images = TileImages(50).images
+        self.grid: List[List[Tile]] = []
+        self.danger_tiles: List[Tile] = []
         self.field_size = 50
         self.coins: List[Coin] = []
-        self.make_grid()
+        self.grid_width = self.make_grid(tile_images)
         self.level_camera_speed = 0
-        # self.player = Player(1, 360, 70)
+        # self.player = LocalPlayer(1, 260, 70)
         self.player = LocalPlayer(1, 500, 400)
-        self.level_bar = LevelBar(self.field_size)
+        self.level_bar = LevelBar(self.field_size, tile_images)
         self.phase = 'game'
         self.font = pygame.font.Font("freesansbold.ttf", 100)
+        self.background_image = pygame.image.load("res/tiles/background.png").convert_alpha()
+        self.background_rects = []
+        bg_counter = 0
+        while bg_counter < self.grid_width:
+            self.background_rects.append(
+                self.background_image.get_rect(topleft=(bg_counter, 0))
+            )
+            bg_counter += self.background_image.get_width()
 
-    def make_grid(self):
+    def make_grid(self, tile_images):
         with open('res/singleplayer_board.txt') as file:
             x = file.readlines()
+            grid_width = len(x[0]) * self.field_size - 1
             for i, line in enumerate(x):
                 # add barrier field
-                self.grid.append([Field(-self.field_size, (i + 1) * self.field_size, self.field_size, 'b')])
+                for k in range(6):
+                    self.grid.append(
+                        [Tile(-self.field_size * (k+1), (i + 1) * self.field_size,
+                              self.field_size, tile_images, 'b', 'brick')])
                 for j, c, in enumerate(line):
                     if c == '\n':
                         break
-                    self.grid[i].append(Field(j * self.field_size, (i + 1) * self.field_size, self.field_size))
-                    if c == '#':
-                        self.grid[i][j + 1].color = (0, 0, 0)
-                        self.grid[i][j + 1].type = '#'
-                    if c == 'A':
-                        self.grid[i][j + 1].type = 'A'
-                        self.danger_fields.append(self.grid[i][j + 1])
                     if c == 'c':
-                        self.coins.append(Coin(self.grid[i][j + 1].rect.centerx, self.grid[i][j + 1].rect.centery))
+                        self.grid[i].append(
+                            Tile(j * self.field_size, (i + 1) * self.field_size, self.field_size, tile_images))
+                        self.coins.append(Coin(self.grid[i][j + 1].rect.centerx, self.grid[i][j + 1].rect.centery,
+                                               tile_images['coin']))
+                    elif c == '#':
+                        filename = 'dirt'
+                        if i != 0 and self.grid[i-1][j].type != '#':
+                            filename = 'grass'
+                        self.grid[i].append(
+                            Tile(j * self.field_size, (i + 1) * self.field_size,
+                                 self.field_size, tile_images, '#', filename))
+                    elif c == 'A':
+                        self.grid[i].append(
+                            Tile(j * self.field_size, (i + 1) * self.field_size,
+                                 self.field_size, tile_images, 'A', 'thorns'))
+                        self.danger_tiles.append(self.grid[i][j + 1])
+                    else:
+                        self.grid[i].append(
+                            Tile(j * self.field_size, (i + 1) * self.field_size, self.field_size, tile_images))
                 # add barrier field
-                self.grid[i].append(Field(j * self.field_size, (i + 1) * self.field_size, self.field_size, 'b'))
+                for k in range(6):
+                    self.grid[i].append(
+                        Tile((j + k) * self.field_size, (i + 1) * self.field_size,
+                             self.field_size, tile_images, 'b', 'brick'))
+        return grid_width
 
     def draw(self, win: pygame.Surface) -> None:
+        # win.fill((255, 255, 255))
+        for rect in self.background_rects:
+            win.blit(self.background_image, rect)
         for row in self.grid:
-            for field in row:
-                if field.rect.colliderect(win.get_rect()):
-                    field.draw(win)
+            for tile in row:
+                if tile.rect.colliderect(win.get_rect()):
+                    tile.draw(win)
         for coin in self.coins:
             if coin.rect.colliderect(win.get_rect()):
                 coin.draw(win)
@@ -69,11 +100,11 @@ class Singleplayer(Route):
             self.check_danger_fields()
 
         for row in self.grid:
-            for field in row:
-                if field.type != '.':
+            for tile in row:
+                if tile.type != '.':
                     for arrow in self.player.bow.fly_arrows:
-                        if (abs(arrow.angle) >= 90 and field.rect.collidepoint(arrow.rect.midleft)) or (
-                                abs(arrow.angle) < 90 and field.rect.collidepoint(arrow.rect.midright)):
+                        if (abs(arrow.angle) >= 90 and tile.rect.collidepoint(arrow.rect.midleft)) or (
+                                abs(arrow.angle) < 90 and tile.rect.collidepoint(arrow.rect.midright)):
                             self.player.bow.fly_arrows.remove(arrow)
 
         for coin in self.coins:
@@ -99,12 +130,12 @@ class Singleplayer(Route):
     def camera(self):
         move = False
         if self.player.direction == "right" and self.player.is_moving:
-            if self.player.rect.centerx >= 800:
+            if self.player.rect.centerx >= 700:
                 self.player.speed = 0
                 self.level_camera_speed = -2
                 move = True
         if self.player.direction == "left" and self.player.is_moving:
-            if self.player.rect.centerx <= 200:
+            if self.player.rect.centerx <= 300:
                 self.player.speed = 0
                 self.level_camera_speed = 2
                 move = True
@@ -116,14 +147,17 @@ class Singleplayer(Route):
         if self.level_camera_speed != 0:
             player_blocks_state = self.player.is_on_block(self.grid)
             for field_list in self.grid:
-                for field in field_list:
+                for tile in field_list:
                     if "left" not in player_blocks_state and "right" not in player_blocks_state:
-                        field.rect.x += self.level_camera_speed
+                        tile.rect.x += self.level_camera_speed
             for coin in self.coins:
                 if "left" not in player_blocks_state and "right" not in player_blocks_state:
                     coin.rect.x += self.level_camera_speed
+            for rect in self.background_rects:
+                if "left" not in player_blocks_state and "right" not in player_blocks_state:
+                    rect.x += self.level_camera_speed
 
     def check_danger_fields(self):
-        for field in self.danger_fields:
-            if self.player.rect.collidepoint(field.rect.center):
+        for tile in self.danger_tiles:
+            if self.player.rect.collidepoint(tile.rect.center):
                 self.phase = 'lose'
