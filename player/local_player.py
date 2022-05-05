@@ -25,6 +25,7 @@ class LocalPlayer(Player):
         self.arms_controller.draw_arms(win)
         if self.r_pressed:
             self.bow.draw(win)
+        self.bow.draw_fly_arrows(win)
 
     def update(self, grid, players) -> List[Tuple[int, str]]:
         blocks_state = self.is_on_block(grid)
