@@ -39,8 +39,8 @@ class FlyArrow:
         self.image = img
         self.rect = rect
         self.angle = self.set_angle(mouse_pos)
-        print(math.degrees(self.angle))
-        self.speed = 2
+        print(f"deg {math.degrees(self.angle)}")
+        self.speed = 10
 
     def draw(self, win: pygame.Surface):
         win.blit(self.image, self.rect)

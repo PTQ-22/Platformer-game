@@ -68,10 +68,24 @@ class Singleplayer(Route):
             self.player.update(self.grid, [])
             self.check_danger_fields()
 
+        for row in self.grid:
+            for field in row:
+                if field.type != '.':
+                    for arrow in self.player.bow.fly_arrows:
+                        if (abs(arrow.angle) >= 90 and field.rect.collidepoint(arrow.rect.midleft)) or (
+                                abs(arrow.angle) < 90 and field.rect.collidepoint(arrow.rect.midright)):
+                            self.player.bow.fly_arrows.remove(arrow)
+
         for coin in self.coins:
             if self.player.rect.colliderect(coin.rect):
                 self.coins.remove(coin)
                 self.level_bar.increse_coin_counter()
+            for arrow in self.player.bow.fly_arrows:
+                if (abs(arrow.angle) >= 90 and coin.rect.collidepoint(arrow.rect.midleft)) \
+                        or (abs(arrow.angle) < 90 and coin.rect.collidepoint(arrow.rect.midright)):
+                    self.coins.remove(coin)
+                    self.level_bar.increse_coin_counter()
+                    self.player.bow.fly_arrows.remove(arrow)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
