@@ -3,7 +3,7 @@ import pickle
 import json
 
 from networking.game_data_object import GameDataObject
-from player.player_data_object import PlayerDataObject
+from networking.player_data_object import PlayerDataObject
 
 
 class Client:

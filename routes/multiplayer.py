@@ -3,8 +3,10 @@ import sys
 
 from networking.client import Client
 from player.player import Player
-from player.player_data_object import PlayerDataObject
+from networking.player_data_object import PlayerDataObject
 from routes.route import Route
+from utils.button import Button
+from utils.tile import TileImages
 
 
 class MultiplayerGame(Route):
@@ -23,6 +25,10 @@ class MultiplayerGame(Route):
             self.phase = 'waiting'
 
         self.font = pygame.font.Font("freesansbold.ttf", 50)
+        self.small_font = pygame.font.Font("freesansbold.ttf", 30)
+        self.background_image = pygame.image.load("res/tiles/background.png").convert_alpha()
+        self.thorns_image = TileImages(50).images['thorns']
+        self.menu_button = Button("MENU", 15, (10, 10, 60, 30), (0, 200, 0), (0, 150, 0))
 
     def try_to_connect_and_init(self):
         self.client = Client()
@@ -33,26 +39,27 @@ class MultiplayerGame(Route):
         self.local_player: Player = self.players[self.player_id]
 
     def draw(self, win: pygame.Surface) -> None:
+        win.blit(self.background_image, (0, 0))
+        self.menu_button.draw(win)
         if self.phase == 'game':
             for row in self.game_data.grid:
                 for field in row:
-                    field.draw(win)
-
-            text_obj = self.font.render(str(self.game_data.alive), False, (0, 0, 0))
-            win.blit(text_obj, (20, 20))
+                    if field.type != '.':
+                        field.draw(win)
+            for i in range(20):
+                win.blit(self.thorns_image, (i * 50, 650))
 
             if self.game_data.time_to_start > 0:
-                time_test_obj = self.font.render(str(self.game_data.time_to_start), False, (0, 0, 0))
-                win.blit(time_test_obj, (400, 20))
+                time_test_obj = self.small_font.render(f"TO START: {self.game_data.time_to_start}", False, (0, 0, 0))
+                win.blit(time_test_obj, (120, 10))
 
             if self.game_data.winner is not None:
-                winner_text_obj = self.font.render(f"Winner: {self.game_data.winner.id}", False, (0, 0, 0))
-                win.blit(winner_text_obj, (600, 20))
+                winner_text_obj = self.font.render(f"Winner: {self.game_data.winner.id}", False, (200, 0, 0))
+                win.blit(winner_text_obj, (600, 10))
 
             for player in self.players.values():
                 player.draw(win)
         elif self.phase == 'waiting':
-            win.fill((200, 200, 200))
             text_obj = self.font.render("Waiting for connection...", False, (0, 0, 0))
             win.blit(text_obj, (200, 250))
 
@@ -73,6 +80,9 @@ class MultiplayerGame(Route):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
+            if self.menu_button.is_mouse(event):
+                from routes.menu import Menu
+                return Menu((1000, 700))
         return self
 
     def fetch_data_from_server(self, hit_players_data):

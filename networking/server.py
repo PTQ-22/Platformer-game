@@ -79,7 +79,7 @@ def main():
 
     start_new_thread(grid_controller, ())
 
-    id_counter = 0
+    id_counter = 1
     while True:
         try:
             connection, address = s.accept()

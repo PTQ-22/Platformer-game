@@ -38,6 +38,9 @@ class Player:
         self.jump_controller = JumpController()
         self.hit_controller = HitController()
 
+        font = pygame.font.Font("freesansbold.ttf", 25)
+        self.text_obj = font.render(f'{self.id}', False, (200, 0, 0))
+
     def draw(self, win: pygame.Surface):
         if self.is_moving:
             self.animation_controller.animate_walk(win, self.rect, self.direction)
@@ -49,6 +52,7 @@ class Player:
 
         self.arms_controller.update_rect_pos(self.rect)
         self.arms_controller.draw_arms(win)
+        win.blit(self.text_obj, self.text_obj.get_rect(center=(self.rect.centerx, self.rect.centery + 5)))
 
     def key_handler(self, blocks_state: Set[str], players) -> List[Tuple[int, str]]:
         """

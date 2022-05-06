@@ -21,7 +21,6 @@ class Singleplayer(Route):
         self.grid_width, p_start, self.end_tile = self.make_grid(tile_images)
         self.level_camera_speed = 0
         self.player = LocalPlayer(1, *p_start)
-        # self.player = LocalPlayer(1, 500, 400)
         self.level_bar = LevelBar(self.field_size, tile_images)
         self.phase = 'game'
         self.font = pygame.font.Font("freesansbold.ttf", 100)
@@ -33,6 +32,7 @@ class Singleplayer(Route):
                 self.background_image.get_rect(topleft=(bg_counter, 0))
             )
             bg_counter += self.background_image.get_width()
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
 
     def make_grid(self, tile_images):
         p_start = None
@@ -56,7 +56,7 @@ class Singleplayer(Route):
                                                tile_images['coin']))
                     elif c == '#':
                         filename = 'dirt'
-                        if i != 0 and self.grid[i-1][j].type != '#':
+                        if i != 0 and self.grid[i-1][j+1].type != '#':
                             filename = 'grass'
                         self.grid[i].append(
                             Tile(j * self.field_size, (i + 1) * self.field_size,
@@ -86,11 +86,9 @@ class Singleplayer(Route):
                     self.grid[i].append(
                         Tile((j + k) * self.field_size, (i + 1) * self.field_size,
                              self.field_size, tile_images, 'b', 'brick'))
-        print(end_tile)
         return grid_width, p_start, end_tile
 
     def draw(self, win: pygame.Surface) -> None:
-        # win.fill((255, 255, 255))
         for rect in self.background_rects:
             win.blit(self.background_image, rect)
         for row in self.grid:
@@ -128,18 +126,20 @@ class Singleplayer(Route):
         for coin in self.coins:
             if self.player.rect.colliderect(coin.rect):
                 self.coins.remove(coin)
-                self.level_bar.increse_coin_counter()
+                self.level_bar.increase_coin_counter()
             for arrow in self.player.bow.fly_arrows:
                 if (abs(arrow.angle) >= 90 and coin.rect.collidepoint(arrow.rect.midleft)) \
                         or (abs(arrow.angle) < 90 and coin.rect.collidepoint(arrow.rect.midright)):
                     self.coins.remove(coin)
-                    self.level_bar.increse_coin_counter()
+                    self.level_bar.increase_coin_counter()
                     self.player.bow.fly_arrows.remove(arrow)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit(0)
+            if event.type == pygame.USEREVENT and self.phase == 'game':
+                self.level_bar.increase_time_counter()
             if self.level_bar.menu_button.is_mouse(event):
                 from routes.menu import Menu
                 return Menu((1000, 700))

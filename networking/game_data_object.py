@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from player.player_data_object import PlayerDataObject
+from networking.player_data_object import PlayerDataObject
 from utils.field import Field
 
 
@@ -46,7 +46,7 @@ class GameDataObject:
                 self.players[p_hit_tuple[0]].hit_direction = p_hit_tuple[1]
             player.hit_players_ids = None
 
-        if player.y < 750:
+        if player.y < 650:
             self.players[player.id].x = player.x
             self.players[player.id].y = player.y
             self.players[player.id].is_moving = player.is_moving

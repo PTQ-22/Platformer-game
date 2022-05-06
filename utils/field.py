@@ -21,8 +21,3 @@ class Field:
         else:
             pygame.draw.rect(win, self.color, self.rect)
         # pygame.draw.rect(win, (0, 0, 0), self.rect, 1)
-
-    @staticmethod
-    def load_tile_img(size: int, filename: str):
-        img = pygame.image.load(f"res/tiles/{filename}").convert_alpha()
-        return pygame.transform.scale(img, (size, size))
