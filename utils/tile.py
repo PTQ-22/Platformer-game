@@ -14,7 +14,8 @@ class TileImages:
             "thorns": self.load_tile_img(size, "thorns.png"),
             "coin": self.load_tile_img(size, "coin.png"),
             "door_up": self.load_tile_img(size, "door_up.png"),
-            "door_down": self.load_tile_img(size, "door_down.png")
+            "door_down": self.load_tile_img(size, "door_down.png"),
+            "player_pos": self.load_tile_img(size, "player_pos.png")
         }
 
     @staticmethod
@@ -33,3 +34,16 @@ class Tile:
 
     def draw(self, win: pygame.Surface):
         win.blit(self.img, self.rect)
+
+    @staticmethod
+    def find_type(name: str) -> str:
+        if name == 'blank':
+            return '.'
+        elif name == 'dirt' or name == 'grass':
+            return '#'
+        elif name == 'thorns':
+            return 'A'
+        elif name == 'coin':
+            return 'c'
+        elif name == 'brick':
+            return 'b'

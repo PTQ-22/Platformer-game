@@ -38,7 +38,7 @@ class LevelBuilderMenu(Route):
                 from routes.menu import Menu
                 return Menu((1000, 700))
             if self.add_button.is_mouse(event):
-                return LevelBuilder()
+                return LevelBuilder(len(self.level_buttons) + 1)
             for button in self.level_buttons:
                 if button.is_mouse(event):
                     return Singleplayer(button.text.lower())
