@@ -12,13 +12,14 @@ from utils.tile import Tile, TileImages
 
 class Singleplayer(Route):
 
-    def __init__(self):
+    def __init__(self, board_name: str = "../singleplayer_board"):
+        self.is_builder_level = False if board_name == "../singleplayer_board" else True
         tile_images = TileImages(50).images
         self.grid: List[List[Tile]] = []
         self.danger_tiles: List[Tile] = []
         self.field_size = 50
         self.coins: List[Coin] = []
-        self.grid_width, p_start, self.end_tile = self.make_grid(tile_images)
+        self.grid_width, p_start, self.end_tile = self.make_grid(tile_images, board_name)
         self.level_camera_speed = 0
         self.player = LocalPlayer(1, *p_start)
         self.level_bar = LevelBar(self.field_size, tile_images)
@@ -34,10 +35,10 @@ class Singleplayer(Route):
             bg_counter += self.background_image.get_width()
         pygame.time.set_timer(pygame.USEREVENT, 1000)
 
-    def make_grid(self, tile_images):
+    def make_grid(self, tile_images, board_name):
         p_start = None
         end_tile = None
-        with open('res/singleplayer_board.txt') as file:
+        with open(f'boards/builder_boards/{board_name}.txt') as file:
             x = file.readlines()
             grid_width = len(x[0]) * self.field_size - 1
             for i, line in enumerate(x):
@@ -141,8 +142,12 @@ class Singleplayer(Route):
             if event.type == pygame.USEREVENT and self.phase == 'game':
                 self.level_bar.increase_time_counter()
             if self.level_bar.menu_button.is_mouse(event):
-                from routes.menu import Menu
-                return Menu((1000, 700))
+                if self.is_builder_level:
+                    from routes.level_builder_menu import LevelBuilderMenu
+                    return LevelBuilderMenu()
+                else:
+                    from routes.menu import Menu
+                    return Menu((1000, 700))
         return self
 
     def camera(self):

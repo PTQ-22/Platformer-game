@@ -20,7 +20,7 @@ class GameDataObject:
             self.grid.append([])
             for j in range(0, 700, self.field_size):
                 self.grid[i // self.field_size].append(Field(i, j, self.field_size))
-        with open("res/multiplayer_board.txt") as file:
+        with open("boards/multiplayer_board.txt") as file:
             x = file.readlines()
             for i, line in enumerate(x):
                 for j, c in enumerate(line):
