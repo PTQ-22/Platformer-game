@@ -18,10 +18,10 @@ class Singleplayer(Route):
         self.danger_tiles: List[Tile] = []
         self.field_size = 50
         self.coins: List[Coin] = []
-        self.grid_width = self.make_grid(tile_images)
+        self.grid_width, p_start, self.end_tile = self.make_grid(tile_images)
         self.level_camera_speed = 0
-        # self.player = LocalPlayer(1, 260, 70)
-        self.player = LocalPlayer(1, 500, 400)
+        self.player = LocalPlayer(1, *p_start)
+        # self.player = LocalPlayer(1, 500, 400)
         self.level_bar = LevelBar(self.field_size, tile_images)
         self.phase = 'game'
         self.font = pygame.font.Font("freesansbold.ttf", 100)
@@ -35,6 +35,8 @@ class Singleplayer(Route):
             bg_counter += self.background_image.get_width()
 
     def make_grid(self, tile_images):
+        p_start = None
+        end_tile = None
         with open('res/singleplayer_board.txt') as file:
             x = file.readlines()
             grid_width = len(x[0]) * self.field_size - 1
@@ -64,7 +66,19 @@ class Singleplayer(Route):
                             Tile(j * self.field_size, (i + 1) * self.field_size,
                                  self.field_size, tile_images, 'A', 'thorns'))
                         self.danger_tiles.append(self.grid[i][j + 1])
+                    elif c == 'e':
+                        # print(self.grid[i-1][j+1].img)
+                        self.grid[i-1][j+1] = Tile(
+                            j * self.field_size, i * self.field_size, self.field_size, tile_images, 'd', 'door_up'
+                        )
+                        # print(self.grid[i-1][j+1].img)
+                        self.grid[i].append(
+                            Tile(j * self.field_size, (i + 1) * self.field_size,
+                                 self.field_size, tile_images, 'd', 'door_down'))
+                        end_tile = self.grid[i][j+1]
                     else:
+                        if c == 's':
+                            p_start = (j * self.field_size, (i + 1) * self.field_size + self.field_size // 2)
                         self.grid[i].append(
                             Tile(j * self.field_size, (i + 1) * self.field_size, self.field_size, tile_images))
                 # add barrier field
@@ -72,7 +86,8 @@ class Singleplayer(Route):
                     self.grid[i].append(
                         Tile((j + k) * self.field_size, (i + 1) * self.field_size,
                              self.field_size, tile_images, 'b', 'brick'))
-        return grid_width
+        print(end_tile)
+        return grid_width, p_start, end_tile
 
     def draw(self, win: pygame.Surface) -> None:
         # win.fill((255, 255, 255))
@@ -90,6 +105,9 @@ class Singleplayer(Route):
 
         if self.phase == 'lose':
             text_obj = self.font.render("YOU LOST", False, (200, 0, 0))
+            win.blit(text_obj, text_obj.get_rect(midbottom=win.get_rect().center))
+        elif self.phase == 'won':
+            text_obj = self.font.render("YOU WON", False, (0, 200, 0))
             win.blit(text_obj, text_obj.get_rect(midbottom=win.get_rect().center))
 
     def update_state(self) -> 'Route':
@@ -161,3 +179,5 @@ class Singleplayer(Route):
         for tile in self.danger_tiles:
             if self.player.rect.collidepoint(tile.rect.center):
                 self.phase = 'lose'
+        if self.player.rect.collidepoint(self.end_tile.rect.topright):
+            self.phase = 'won'

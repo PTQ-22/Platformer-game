@@ -13,6 +13,8 @@ class TileImages:
             "grass": self.load_tile_img(size, "grass.png"),
             "thorns": self.load_tile_img(size, "thorns.png"),
             "coin": self.load_tile_img(size, "coin.png"),
+            "door_up": self.load_tile_img(size, "door_up.png"),
+            "door_down": self.load_tile_img(size, "door_down.png")
         }
 
     @staticmethod
