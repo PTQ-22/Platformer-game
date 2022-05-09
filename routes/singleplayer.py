@@ -129,8 +129,9 @@ class Singleplayer(Route):
                 self.coins.remove(coin)
                 self.level_bar.increase_coin_counter()
             for arrow in self.player.bow.fly_arrows:
-                if (abs(arrow.angle) >= 90 and coin.rect.collidepoint(arrow.rect.midleft)) \
-                        or (abs(arrow.angle) < 90 and coin.rect.collidepoint(arrow.rect.midright)):
+                # if (abs(arrow.angle) >= 90 and coin.rect.collidepoint(arrow.rect.midleft)) \
+                #         or (abs(arrow.angle) < 90 and coin.rect.collidepoint(arrow.rect.midright)):
+                if coin.rect.colliderect(arrow.rect):
                     self.coins.remove(coin)
                     self.level_bar.increase_coin_counter()
                     self.player.bow.fly_arrows.remove(arrow)
