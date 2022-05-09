@@ -29,3 +29,8 @@ class Button:
             return False
         self.current_color = self.color
         return False
+
+    def move_y(self, dy: int):
+        self.rect.y += dy
+        self.text_rect = self.text_obj.get_rect(
+            center=(self.rect[0] + self.rect[2] // 2, self.rect[1] + self.rect[3] // 2))

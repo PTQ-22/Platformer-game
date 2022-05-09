@@ -119,7 +119,9 @@ class LevelBuilder(Route):
         return self
 
     def check_for_click_on_grid(self):
-        for row in self.grid:
+        for i, row in enumerate(self.grid):
+            if i+1 == len(self.grid):
+                continue
             for tile in row:
                 if tile.type in self.immutable_tiles_types:
                     continue
