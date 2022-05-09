@@ -65,6 +65,7 @@ class Bow:
         self.fly_arrows: List[FlyArrow] = []
         self.counter = 0
         self.shot = False
+        pygame.mixer.music.load("res/bow.wav")
 
     def draw(self, win: pygame.Surface):
         win.blit(self.current_image, self.rect)
@@ -92,6 +93,7 @@ class Bow:
             if self.counter == 0:
                 img, rect = self.bow_arrow.get_img_and_rect()
                 self.fly_arrows.append(FlyArrow(img, rect, mouse_pos))
+                pygame.mixer.music.play()
         if self.shot:
             self.counter += 1
             if self.counter >= 40:

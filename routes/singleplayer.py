@@ -183,6 +183,10 @@ class Singleplayer(Route):
     def check_danger_fields(self):
         for tile in self.danger_tiles:
             if self.player.rect.collidepoint(tile.rect.center):
+                pygame.mixer.music.load("res/thorns_hit.wav")
+                pygame.mixer.music.play()
                 self.phase = 'lose'
         if self.player.rect.collidepoint(self.end_tile.rect.topright):
+            pygame.mixer.music.load("res/win.wav")
+            pygame.mixer.music.play()
             self.phase = 'won'

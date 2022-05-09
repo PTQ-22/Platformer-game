@@ -12,7 +12,7 @@ from utils.button import Button
 class Menu(Route):
 
     def __init__(self, win_size: Tuple[int, int]):
-        self.color = (200, 200, 200)  # TODO change to picture
+        self.color = (200, 200, 200)
         self.buttons = [
             Button("SINGLEPLAYER", 40,
                    (win_size[0] // 2 - 200, win_size[1] // 2 - 300, 400, 100),
