@@ -1,4 +1,4 @@
-# competition-project
+# Platformer-game
 Project written in python using pygame.
 
 To run singleplayer modes run:
